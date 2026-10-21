@@ -1,0 +1,54 @@
+<article
+  class="flex h-full flex-col overflow-hidden rounded-xl bg-white shadow-sm ring-1 ring-slate-200 transition hover:shadow-md"
+>
+  @if (imageSrc(); as src) {
+    <img
+      class="aspect-[4/3] w-full object-cover"
+      width="480"
+      height="360"
+      [src]="src"
+      [alt]="hotel().name"
+      [attr.loading]="priority() ? 'eager' : 'lazy'"
+      [attr.fetchpriority]="priority() ? 'high' : null"
+      (error)="onImageError()"
+    />
+  } @else {
+    <div
+      class="flex aspect-[4/3] items-center justify-center bg-slate-100 text-4xl"
+      aria-hidden="true"
+      data-testid="image-fallback"
+    >
+      🏨
+    </div>
+  }
+
+  <div class="flex flex-1 flex-col gap-2 p-4">
+    <div class="flex items-start justify-between gap-2">
+      <h3 class="font-semibold text-slate-900 capitalize" data-testid="name">{{ hotel().name }}</h3>
+      <p
+        class="shrink-0 rounded-md bg-blue-600 px-2 py-0.5 text-sm font-bold text-white"
+        data-testid="rate"
+      >
+        <span class="sr-only">Valoración </span>{{ hotel().rate | number: '1.1-1' }}
+      </p>
+    </div>
+
+    <p
+      class="text-amber-600"
+      role="img"
+      [attr.aria-label]="hotel().stars + ' de ' + maxStars + ' estrellas'"
+      data-testid="stars"
+    >
+      @for (filled of stars(); track $index) {
+        <span aria-hidden="true" [class.text-slate-300]="!filled">★</span>
+      }
+    </p>
+
+    <p class="text-sm text-slate-600" data-testid="address">{{ hotel().address }}</p>
+
+    <p class="mt-auto pt-2 text-right text-xl font-bold text-slate-900" data-testid="price">
+      {{ hotel().price | currency: 'EUR' }}
+      <span class="text-xs font-normal text-slate-600">/ noche</span>
+    </p>
+  </div>
+</article>

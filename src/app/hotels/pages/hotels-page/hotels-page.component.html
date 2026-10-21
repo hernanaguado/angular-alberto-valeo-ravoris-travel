@@ -1,0 +1,97 @@
+@let count = store.filteredHotels().length;
+
+<div class="min-h-screen bg-slate-50">
+  <header class="bg-white shadow-sm">
+    <div class="mx-auto flex max-w-7xl items-center gap-3 px-4 py-4">
+      <img src="assets/logo.png" alt="Ávoristech" width="562" height="191" class="h-8 w-auto" />
+      <h1 class="text-xl font-bold text-slate-900">Hoteles</h1>
+    </div>
+  </header>
+
+  <div class="mx-auto grid max-w-7xl gap-6 px-4 py-6 lg:grid-cols-[18rem_1fr]">
+    <aside class="lg:sticky lg:top-6 lg:self-start">
+      <app-hotel-filters
+        [filters]="store.filters()"
+        (filtersChange)="store.updateFilters($event)"
+        (filtersReset)="store.resetFilters()"
+      />
+    </aside>
+
+    <main aria-labelledby="results-heading">
+      <h2
+        #resultsHeading
+        id="results-heading"
+        tabindex="-1"
+        class="sr-only scroll-mt-6"
+        data-testid="results-heading"
+      >
+        Resultados
+      </h2>
+
+      <!-- Región viva permanente: anuncia carga y número de resultados al lector de pantalla -->
+      <p class="mb-4 min-h-5 text-sm text-slate-600" role="status" data-testid="results-count">
+        @if (store.isLoading()) {
+          Cargando hoteles…
+        } @else if (!store.error()) {
+          {{ count }} {{ count === 1 ? 'hotel encontrado' : 'hoteles encontrados' }}
+          @if (store.totalPages() > 1) {
+            · mostrando {{ store.visibleRange().from }}–{{ store.visibleRange().to }}
+          }
+        }
+      </p>
+
+      @if (store.isLoading()) {
+        <ul
+          class="grid grid-cols-1 gap-6 sm:grid-cols-2 xl:grid-cols-3"
+          aria-hidden="true"
+          data-testid="loading"
+        >
+          @for (card of skeletonCards; track card) {
+            <li class="h-80 animate-pulse rounded-xl bg-slate-200 motion-reduce:animate-none"></li>
+          }
+        </ul>
+      } @else if (store.error()) {
+        <div class="py-20 text-center" role="alert" data-testid="error">
+          <p class="text-red-700">No se han podido cargar los hoteles.</p>
+          <button
+            type="button"
+            class="btn-primary mt-4"
+            (click)="store.reload()"
+            data-testid="retry"
+          >
+            Reintentar
+          </button>
+        </div>
+      } @else if (store.pagedHotels().length) {
+        <ul role="list" class="grid grid-cols-1 gap-6 sm:grid-cols-2 xl:grid-cols-3">
+          @for (hotel of store.pagedHotels(); track hotel.id) {
+            <li>
+              <app-hotel-card [hotel]="hotel" [priority]="$index < priorityImages" />
+            </li>
+          }
+        </ul>
+
+        <app-pagination
+          class="mt-8 block"
+          [currentPage]="store.page()"
+          [totalPages]="store.totalPages()"
+          (pageChange)="onPageChange($event)"
+        />
+      } @else {
+        <div class="py-20 text-center" data-testid="empty">
+          <p class="text-slate-600">No hay hoteles que coincidan con los filtros.</p>
+          @if (store.hasActiveFilters()) {
+            <button
+              type="button"
+              class="btn-primary mt-4"
+              (click)="store.resetFilters()"
+              data-testid="empty-reset"
+            >
+              Limpiar filtros
+            </button>
+          }
+        </div>
+      }
+    </main>
+  </div>
+</div>

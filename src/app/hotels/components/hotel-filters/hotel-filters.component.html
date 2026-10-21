@@ -1,0 +1,120 @@
+@let rateText = filters().minRate | number: '1.1-1';
+@let priceText = filters().maxPrice | currency: 'EUR' : 'symbol' : '1.0-0';
+
+<section
+  class="rounded-xl bg-white shadow-sm ring-1 ring-slate-200"
+  aria-labelledby="filters-title"
+>
+  <div class="flex items-center justify-between gap-2 p-5">
+    <h2 id="filters-title" class="font-semibold text-slate-900">Filtros</h2>
+    <div class="flex items-center gap-4">
+      <button
+        type="button"
+        class="btn-link"
+        [disabled]="!canReset()"
+        (click)="filtersReset.emit()"
+        data-testid="reset"
+      >
+        Limpiar
+      </button>
+      <button
+        type="button"
+        class="btn-link lg:hidden"
+        aria-controls="filters-panel"
+        [attr.aria-expanded]="expanded()"
+        (click)="toggleExpanded()"
+        data-testid="toggle"
+      >
+        {{ expanded() ? 'Ocultar' : 'Mostrar' }}
+      </button>
+    </div>
+  </div>
+
+  <form
+    id="filters-panel"
+    role="search"
+    aria-labelledby="filters-title"
+    class="flex-col gap-6 px-5 pb-5 lg:flex"
+    [class.flex]="expanded()"
+    [class.hidden]="!expanded()"
+    (submit)="$event.preventDefault()"
+    data-testid="panel"
+  >
+    <div class="flex flex-col gap-2">
+      <label for="filter-name" class="text-sm font-medium text-slate-700">Nombre</label>
+      <input
+        #nameInput
+        id="filter-name"
+        type="search"
+        class="rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:outline-none"
+        placeholder="Buscar hotel…"
+        autocomplete="off"
+        [value]="filters().name"
+        (input)="onNameChange(nameInput.value)"
+        data-testid="name"
+      />
+    </div>
+
+    <fieldset class="flex flex-col gap-2">
+      <legend class="mb-2 text-sm font-medium text-slate-700">Categoría</legend>
+      @for (option of starOptions; track option.value) {
+        <label class="flex cursor-pointer items-center gap-2 text-sm">
+          <input
+            #starInput
+            type="checkbox"
+            class="size-4 accent-blue-600"
+            [checked]="selectedStars().has(option.value)"
+            (change)="onStarToggle(option.value, starInput.checked)"
+            data-testid="star"
+          />
+          <span class="text-amber-500" aria-hidden="true">{{ option.icons }}</span>
+          <span class="text-slate-600">{{ option.label }}</span>
+        </label>
+      }
+    </fieldset>
+
+    <div class="flex flex-col gap-2">
+      <div class="flex justify-between text-sm font-medium text-slate-700">
+        <label for="filter-rate">Valoración mínima</label>
+        <output for="filter-rate" class="text-blue-700" data-testid="rate-value">{{
+          rateText
+        }}</output>
+      </div>
+      <input
+        #rateInput
+        id="filter-rate"
+        type="range"
+        class="accent-blue-600"
+        [min]="rateRange.min"
+        [max]="rateRange.max"
+        [step]="rateRange.step"
+        [value]="filters().minRate"
+        [attr.aria-valuetext]="rateText + ' de ' + rateRange.max + ' o más'"
+        (input)="onMinRateChange(rateInput.valueAsNumber)"
+        data-testid="rate"
+      />
+    </div>
+
+    <div class="flex flex-col gap-2">
+      <div class="flex justify-between text-sm font-medium text-slate-700">
+        <label for="filter-price">Precio máximo</label>
+        <output for="filter-price" class="text-blue-700" data-testid="price-value">{{
+          priceText
+        }}</output>
+      </div>
+      <input
+        #priceInput
+        id="filter-price"
+        type="range"
+        class="accent-blue-600"
+        [min]="priceRange.min"
+        [max]="priceRange.max"
+        [step]="priceRange.step"
+        [value]="filters().maxPrice"
+        [attr.aria-valuetext]="priceText + ' como máximo'"
+        (input)="onMaxPriceChange(priceInput.valueAsNumber)"
+        data-testid="price"
+      />
+    </div>
+  </form>
+</section>

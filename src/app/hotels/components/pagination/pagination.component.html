@@ -1,0 +1,37 @@
+@if (totalPages() > 1) {
+  <nav class="flex flex-wrap items-center justify-center gap-1" aria-label="Paginación">
+    <button
+      type="button"
+      class="btn-ghost"
+      [disabled]="isFirst()"
+      (click)="goTo(currentPage() - 1)"
+      data-testid="prev"
+    >
+      <span aria-hidden="true">‹</span> Anterior
+    </button>
+
+    @for (page of pages(); track page) {
+      <button
+        type="button"
+        class="min-w-10"
+        [class]="page === currentPage() ? 'btn-primary' : 'btn-ghost'"
+        [attr.aria-label]="'Página ' + page"
+        [attr.aria-current]="page === currentPage() ? 'page' : null"
+        (click)="goTo(page)"
+        data-testid="page"
+      >
+        {{ page }}
+      </button>
+    }
+
+    <button
+      type="button"
+      class="btn-ghost"
+      [disabled]="isLast()"
+      (click)="goTo(currentPage() + 1)"
+      data-testid="next"
+    >
+      Siguiente <span aria-hidden="true">›</span>
+    </button>
+  </nav>
+}
